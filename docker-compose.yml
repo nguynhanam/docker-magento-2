@@ -1,0 +1,23 @@
+version: '2'
+services:
+  nginx:
+    image: nginx:1.14.0
+    ports:
+     - "8080:80"
+    volumes:
+     - ./src/magento2/:/src/magento2/
+     - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    links:
+        - php7.0-fpm
+        - db
+  php7.0-fpm:
+    build: ./php
+    volumes:
+     - ./src/magento2/:/src/magento2/
+  db:
+    image: mysql:5.7
+    volumes: 
+      - ./data:/var/lib/mysql
+    environment:
+        MYSQL_DATABASE: 'magento2'
+        MYSQL_ROOT_PASSWORD: 'admin123'
