@@ -1,6 +1,6 @@
 FROM php:7.0-fpm
-RUN apt-get update && apt-get install -y apt-utils
-RUN apt-get update && apt-get install -y \
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y apt-utils
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
         libfreetype6-dev \
         libmcrypt-dev \
         libpng-dev \
@@ -9,11 +9,11 @@ RUN apt-get update && apt-get install -y \
         libxslt-dev \
         apt-utils \
         libjpeg-dev \
-        libwebp-dev \	
-        libjpeg62-turbo-dev \ 
-        libpng-dev libxpm-dev 
+        libpq-dev \
+        libmemcached-dev \
+        curl
 RUN docker-php-ext-install iconv \
-    && docker-php-ext-install gd mysqli \
+    && docker-php-ext-install gd \
     && docker-php-ext-install curl \
     && docker-php-ext-install mysqli \
     && docker-php-ext-install pdo \
@@ -27,4 +27,7 @@ RUN docker-php-ext-install iconv \
     && docker-php-ext-install intl \
     && docker-php-ext-install zip \
     && docker-php-ext-install bcmath
+RUN DEBIAN_FRONTEND=noninteractive apt-get update 
 RUN docker-php-ext-configure gd --with-freetype-dir=/usr/lib/x86_64-linux-gnu --with-jpeg-dir=/usr/lib/x86_64-linux-gnu && docker-php-ext-install gd
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug
