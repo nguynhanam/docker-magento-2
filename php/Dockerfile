@@ -1,5 +1,5 @@
 FROM php:7.0-fpm
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y apt-utils
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y apt-utils git
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
         libfreetype6-dev \
         libmcrypt-dev \
