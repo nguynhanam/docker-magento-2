@@ -1,0 +1,85 @@
+version: '2'
+services:
+  db:
+    image: mysql:5.7
+    ports:
+    - "3307:3306"
+    volumes: 
+      - ./data:/var/lib/mysql
+    environment:
+        MYSQL_DATABASE: 'pti_magento2'
+        MYSQL_ROOT_PASSWORD: 'admin123'
+    container_name: pti_mysql
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.5.4
+    restart: always
+    ports:
+      - 9200
+      - 9300
+    environment:
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes: 
+      - ./elasticsearch/sysctl.conf:/etc/sysctl.conf
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 2g
+    container_name: pti_elasticsearch
+  php7.0-fpm:
+    image: sosctannt/fpmmage2:latest
+    restart: always
+    links:
+      - elasticsearch
+      - db
+    volumes:
+    volumes: 
+     - ./elasticsearch/sysctl.conf:/etc/sysctl.conf
+     - ./src/PTI-Mage/:/src/PTI-Mage/
+     - ./nginx/docker-php-ext-xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+    environment:
+      - BASE_URL=http://0.0.0.0:8081/
+      - DB_HOST=db
+      - DB_NAME=pti_magento2
+      - DB_USER=root
+      - DB_PWD=admin123
+    container_name: pti_mage
+  nginx:
+    image: nginx:1.14.0
+    links:
+     - php7.0-fpm
+     - db
+    ports:
+     - "8081:80"
+     - "215:25"
+    volumes:
+     - ./src/PTI-Mage/:/src/PTI-Mage/
+     - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    container_name: pti_nginx
+  ftp:
+      image: sosctannt/fptserver:latest
+      restart: always
+      #volumes:
+      environment:
+        USER: pti
+        PASS: Pti@123
+      ports:
+        - "1021:21"
+        - "1020:20"
+        - "22020:12020"
+        - "22021:12021"
+        - "22022:12022"
+        - "22023:12023"
+        - "22024:12024"
+        - "22025:12025"
+      container_name: pti_ftp
+  rabbitmq:
+      image: sosctannt/rabbitmq
+      restart: always
+      ports:
+        - 15673:15672
+        - 56721:5672
+      container_name: pti_rabbitmq
+volumes:
+  pti_mysql:
